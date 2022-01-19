@@ -78,8 +78,8 @@ app.post("/api/v1/submitform", upload.array("myfile", 2), async (req, res) => {
           },
         });
         if (createdLink) {
-          downloadUrls.push(createdLink.result.url);
-          console.log(createdLink.result.url);
+          downloadUrls.push(createdLink.result.url.split("=")[0] + "=1");
+          console.log(createdLink.result.url.split("=")[0] + "=1");
           if (req.files.length === downloadUrls.length) {
             req.files.map(async (file) => {
               await unlink(file.path);
@@ -101,15 +101,18 @@ app.post("/api/v1/submitform", upload.array("myfile", 2), async (req, res) => {
             }
           }
         } else {
-          res.status(500).send("Error in creating Download Link");
+          return res.status(500).send("Error in creating Download Link");
         }
       } else {
-        res.status(400).send("Error in dropBox");
+        return res.status(400).send("Error in dropBox");
       }
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send("Some Error Occured");
+    req.files.map(async (file) => {
+      await unlink(file.path);
+    });
+    return res.status(500).send("Some Error Occured");
   }
 });
 
